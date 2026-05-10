@@ -42,7 +42,6 @@ while True:
     if going != 'y':
         break
     t.reset()
-
 t.done()
 
 
