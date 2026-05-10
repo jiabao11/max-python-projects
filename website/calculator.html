@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculator – Max's Projects</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0d0d1a; color: #e8e8f0; font-family: 'Segoe UI', sans-serif;
+         min-height: 100vh; display: flex; flex-direction: column; align-items: center; }
+  .back { align-self: flex-start; margin: 20px; text-decoration: none; color: #8888aa; font-size: 0.9rem; }
+  .back:hover { color: #74b9ff; }
+  .card { background: #1a1a3e; border: 1px solid #74b9ff55; border-radius: 20px;
+          padding: 32px; max-width: 420px; width: 92%; margin: 10px; text-align: center; }
+  h1 { font-size: 1.8rem; margin-bottom: 6px; }
+  .subtitle { color: #8888aa; margin-bottom: 24px; font-size: 0.9rem; }
+  .display {
+    background: #0d0d1a; border-radius: 14px; padding: 20px;
+    font-size: 2rem; font-weight: 700; text-align: right; margin-bottom: 14px;
+    min-height: 72px; display: flex; align-items: center; justify-content: flex-end;
+    color: #74b9ff; word-break: break-all; border: 2px solid #2a2a5e;
+  }
+  .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 14px; }
+  .btn {
+    padding: 18px 0; border-radius: 12px; border: none; font-size: 1.1rem;
+    font-weight: 700; cursor: pointer; transition: transform 0.08s, opacity 0.2s;
+  }
+  .btn:active { transform: scale(0.93); }
+  .btn:hover { opacity: 0.85; }
+  .btn-num  { background: #1e1e4e; color: #e8e8f0; }
+  .btn-op   { background: #2a4a6e; color: #74b9ff; }
+  .btn-eq   { background: #74b9ff; color: #0d0d1a; grid-column: span 2; }
+  .btn-clr  { background: #4a1a2e; color: #ff6b6b; }
+  .btn-back { background: #2a2a5e; color: #a29bfe; }
+  .btn-pwr  { background: #2a1e4e; color: #a29bfe; }
+  .hint { color: #8888aa; font-size: 0.8rem; margin-bottom: 14px; }
+  .history { text-align: left; max-height: 150px; overflow-y: auto; }
+  .hist-row { display: flex; justify-content: space-between; padding: 6px 4px;
+              border-bottom: 1px solid #2a2a5e; font-size: 0.9rem; color: #8888aa; }
+  .hist-row span { color: #74b9ff; font-weight: 600; }
+  .error { color: #ff6b6b; font-size: 1rem; }
+</style>
+</head>
+<body>
+<a class="back" href="index.html">← Back to all projects</a>
+<div class="card">
+  <h1>🖩 Calculator</h1>
+  <p class="subtitle">Supports + − × ÷ and powers (^)</p>
+  <div class="display" id="display">0</div>
+  <div class="grid">
+    <button class="btn btn-clr" onclick="clear_()">AC</button>
+    <button class="btn btn-back" onclick="back()">⌫</button>
+    <button class="btn btn-pwr" onclick="append('^')">xⁿ</button>
+    <button class="btn btn-op"  onclick="append('/')">÷</button>
+
+    <button class="btn btn-num" onclick="append('7')">7</button>
+    <button class="btn btn-num" onclick="append('8')">8</button>
+    <button class="btn btn-num" onclick="append('9')">9</button>
+    <button class="btn btn-op"  onclick="append('*')">×</button>
+
+    <button class="btn btn-num" onclick="append('4')">4</button>
+    <button class="btn btn-num" onclick="append('5')">5</button>
+    <button class="btn btn-num" onclick="append('6')">6</button>
+    <button class="btn btn-op"  onclick="append('-')">−</button>
+
+    <button class="btn btn-num" onclick="append('1')">1</button>
+    <button class="btn btn-num" onclick="append('2')">2</button>
+    <button class="btn btn-num" onclick="append('3')">3</button>
+    <button class="btn btn-op"  onclick="append('+')">+</button>
+
+    <button class="btn btn-num" onclick="append('0')" style="grid-column:span 2">0</button>
+    <button class="btn btn-num" onclick="append('.')">.</button>
+    <button class="btn btn-eq"  onclick="calculate()" style="grid-column:span 1; background:#74b9ff; color:#0d0d1a">=</button>
+  </div>
+  <div class="hint">You can also type an equation and press Enter</div>
+  <div class="history" id="history"></div>
+</div>
+
+<script>
+let expr = '';
+
+function update() {
+  document.getElementById('display').textContent = expr || '0';
+  document.getElementById('display').className = 'display';
+}
+
+function append(v) {
+  expr += v; update();
+}
+
+function clear_() {
+  expr = ''; update();
+}
+
+function back() {
+  expr = expr.slice(0, -1); update();
+}
+
+function calculate() {
+  if (!expr) return;
+  try {
+    const safe = expr.replace(/\^/g, '**');
+    // Safe evaluation — only allow numbers and operators
+    if (!/^[\d\s\+\-\*\/\.\(\)\^]+$/.test(expr.replace(/\*\*/g, '^'))) throw new Error('Invalid');
+    const result = Function('"use strict"; return (' + safe + ')')();
+    if (!isFinite(result)) throw new Error('Cannot divide by zero');
+    const rounded = Math.round(result * 1e10) / 1e10;
+    addHistory(expr, rounded);
+    expr = String(rounded);
+    update();
+  } catch(e) {
+    document.getElementById('display').innerHTML = '<span class="error">Error ✗</span>';
+    document.getElementById('display').className = 'display';
+    setTimeout(() => { expr = ''; update(); }, 1200);
+  }
+}
+
+function addHistory(eq, res) {
+  const h = document.getElementById('history');
+  const row = document.createElement('div');
+  row.className = 'hist-row';
+  row.innerHTML = `<span>${eq.replace(/\*/g,'×').replace(/\//g,'÷').replace(/\*\*/g,'^')}</span><span>= ${res}</span>`;
+  h.prepend(row);
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter') { calculate(); return; }
+  if (e.key === 'Backspace') { back(); return; }
+  if (e.key === 'Escape') { clear_(); return; }
+  if (/[\d\+\-\*\/\.\(\)\^]/.test(e.key)) append(e.key);
+});
+</script>
+</body>
+</html>

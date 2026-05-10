@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Max's Python Projects</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0d0d1a; color: #e8e8f0; font-family: 'Segoe UI', sans-serif; min-height: 100vh; }
+
+  header {
+    text-align: center;
+    padding: 60px 20px 40px;
+    background: linear-gradient(135deg, #1a1a3e 0%, #0d0d1a 100%);
+  }
+  header .badge {
+    display: inline-block;
+    background: #2a2a5e;
+    color: #a29bfe;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+  header h1 {
+    font-size: clamp(2rem, 6vw, 3.5rem);
+    font-weight: 800;
+    background: linear-gradient(90deg, #a29bfe, #fd79a8, #fdcb6e);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 12px;
+  }
+  header p { color: #8888aa; font-size: 1.1rem; }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 24px;
+    max-width: 1100px;
+    margin: 50px auto;
+    padding: 0 24px;
+  }
+
+  .card {
+    background: #1a1a3e;
+    border: 1px solid #2a2a5e;
+    border-radius: 16px;
+    padding: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+  }
+  .card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+  }
+  .card .icon { font-size: 2.4rem; }
+  .card h2 { font-size: 1.2rem; font-weight: 700; }
+  .card p { color: #8888aa; font-size: 0.9rem; line-height: 1.5; flex: 1; }
+  .card .tag {
+    display: inline-block;
+    font-size: 0.75rem;
+    padding: 3px 10px;
+    border-radius: 10px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    width: fit-content;
+  }
+  .tag.turtle { background: #1e3a2e; color: #55efc4; }
+  .tag.js     { background: #3a2e1e; color: #fdcb6e; }
+  .tag.logic  { background: #2e1e3a; color: #a29bfe; }
+
+  .btn {
+    display: inline-block;
+    text-decoration: none;
+    padding: 10px 22px;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    text-align: center;
+    transition: opacity 0.2s, transform 0.1s;
+    color: #0d0d1a;
+    margin-top: 4px;
+  }
+  .btn:hover { opacity: 0.88; transform: scale(1.02); }
+
+  .c1 { border-color: #ff6b6b44; } .c1:hover { border-color: #ff6b6b; } .c1 .btn { background: #ff6b6b; }
+  .c2 { border-color: #4ecdc444; } .c2:hover { border-color: #4ecdc4; } .c2 .btn { background: #4ecdc4; }
+  .c3 { border-color: #a29bfe44; } .c3:hover { border-color: #a29bfe; } .c3 .btn { background: #a29bfe; }
+  .c4 { border-color: #fd79a844; } .c4:hover { border-color: #fd79a8; } .c4 .btn { background: #fd79a8; }
+  .c5 { border-color: #fdcb6e44; } .c5:hover { border-color: #fdcb6e; } .c5 .btn { background: #fdcb6e; }
+  .c6 { border-color: #e1705744; } .c6:hover { border-color: #e17057; } .c6 .btn { background: #e17057; }
+  .c7 { border-color: #74b9ff44; } .c7:hover { border-color: #74b9ff; } .c7 .btn { background: #74b9ff; }
+  .c8 { border-color: #55efc444; } .c8:hover { border-color: #55efc4; } .c8 .btn { background: #55efc4; }
+
+  footer { text-align: center; padding: 40px; color: #444466; font-size: 0.85rem; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="badge">🐍 Python Portfolio</div>
+  <h1>Max's Projects</h1>
+  <p>Age 9 &nbsp;·&nbsp; Built with Python &nbsp;·&nbsp; 12 projects</p>
+</header>
+
+<div class="grid">
+
+  <div class="card c1">
+    <div class="icon">🎯</div>
+    <h2>Guess the Number</h2>
+    <span class="tag js">Game</span>
+    <p>Guess the secret number between 1 and 20 — you only get 4 tries!</p>
+    <a class="btn" href="guess_number.html">Play</a>
+  </div>
+
+  <div class="card c2">
+    <div class="icon">🪣</div>
+    <h2>Bucket Puzzle</h2>
+    <span class="tag logic">Recursion</span>
+    <p>Help Jack get exactly 1 litre of water using a 7L and 9L bucket — solved with recursion!</p>
+    <a class="btn" href="bucket_puzzle.html">Watch it solve</a>
+  </div>
+
+  <div class="card c3">
+    <div class="icon">🌀</div>
+    <h2>Rainbow Spiral</h2>
+    <span class="tag turtle">Turtle</span>
+    <p>A rainbow spiral drawn by Python turtle — circles and squares growing bigger and bigger!</p>
+    <a class="btn" href="spiral.html">Draw it</a>
+  </div>
+
+  <div class="card c4">
+    <div class="icon">🎮</div>
+    <h2>Dodge Game</h2>
+    <span class="tag turtle">Game</span>
+    <p>Dodge yellow obstacles coming from all directions and collect green coins to score!</p>
+    <a class="btn" href="obstacles.html">Play</a>
+  </div>
+
+  <div class="card c5">
+    <div class="icon">🧮</div>
+    <h2>Maths Quiz</h2>
+    <span class="tag js">Quiz</span>
+    <p>Answer 20 maths questions — addition, subtraction and multiplication. You have 3 lives!</p>
+    <a class="btn" href="quiz.html">Start Quiz</a>
+  </div>
+
+  <div class="card c6">
+    <div class="icon">⚡</div>
+    <h2>Speed Clicker</h2>
+    <span class="tag js">Game</span>
+    <p>How many times can you click the button in 30 seconds? Set a new high score!</p>
+    <a class="btn" href="clicker.html">Play</a>
+  </div>
+
+  <div class="card c7">
+    <div class="icon">🖩</div>
+    <h2>Calculator</h2>
+    <span class="tag js">Tool</span>
+    <p>Type any maths equation and instantly get the answer. Supports +, −, ×, ÷ and powers!</p>
+    <a class="btn" href="calculator.html">Open</a>
+  </div>
+
+  <div class="card c8">
+    <div class="icon">🔷</div>
+    <h2>Shape Drawer</h2>
+    <span class="tag turtle">Turtle</span>
+    <p>Choose the number of sides and size, then watch Python turtle draw a colourful shape!</p>
+    <a class="btn" href="shapes.html">Draw</a>
+  </div>
+
+</div>
+
+<footer>Made by Max, age 9 &nbsp;·&nbsp; Python 🐍</footer>
+</body>
+</html>

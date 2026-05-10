@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bucket Puzzle – Max's Projects</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0d0d1a; color: #e8e8f0; font-family: 'Segoe UI', sans-serif;
+         min-height: 100vh; display: flex; flex-direction: column; align-items: center; }
+  .back { align-self: flex-start; margin: 20px; text-decoration: none; color: #8888aa; font-size: 0.9rem; }
+  .back:hover { color: #4ecdc4; }
+  .card { background: #1a1a3e; border: 1px solid #4ecdc455; border-radius: 20px;
+          padding: 36px; max-width: 560px; width: 92%; margin: 10px; text-align: center; }
+  h1 { font-size: 1.8rem; margin-bottom: 6px; }
+  .subtitle { color: #8888aa; margin-bottom: 24px; font-size: 0.95rem; }
+  .rules { background: #0d0d1a; border-radius: 12px; padding: 14px 18px;
+           text-align: left; margin-bottom: 24px; font-size: 0.9rem; line-height: 1.9; }
+  .rules span { color: #4ecdc4; font-weight: 700; }
+
+  .buckets { display: flex; justify-content: center; gap: 40px; margin: 20px 0; align-items: flex-end; }
+  .bucket-wrap { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .bucket-label { font-size: 0.85rem; color: #8888aa; }
+  .bucket-amount { font-size: 1.1rem; font-weight: 700; color: #4ecdc4; }
+  .bucket-outer {
+    width: 80px; border: 3px solid #4ecdc4; border-top: none;
+    border-radius: 0 0 10px 10px; background: #0d0d1a;
+    display: flex; flex-direction: column-reverse; overflow: hidden;
+  }
+  .bucket-water {
+    background: linear-gradient(180deg, #4ecdc4aa, #4ecdc4);
+    width: 100%; transition: height 0.5s ease;
+  }
+
+  .step-box { background: #0d0d1a; border-radius: 12px; padding: 14px 20px;
+              min-height: 54px; margin: 14px 0; font-size: 1rem;
+              display: flex; align-items: center; justify-content: center; }
+  .step-num { color: #8888aa; font-size: 0.85rem; margin-bottom: 6px; }
+
+  .controls { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  button {
+    padding: 11px 24px; border-radius: 10px; border: none;
+    font-size: 0.95rem; font-weight: 700; cursor: pointer; transition: opacity 0.2s;
+  }
+  .btn-go { background: #4ecdc4; color: #0d0d1a; }
+  .btn-step { background: #2a2a5e; color: #e8e8f0; }
+  .btn-reset { background: #1a1a3e; color: #8888aa; border: 1px solid #2a2a5e; }
+  button:hover { opacity: 0.85; }
+  button:disabled { opacity: 0.4; cursor: not-allowed; }
+  .win-msg { color: #55efc4; font-weight: 700; font-size: 1.1rem; }
+</style>
+</head>
+<body>
+<a class="back" href="index.html">← Back to all projects</a>
+<div class="card">
+  <h1>🪣 Bucket Puzzle</h1>
+  <p class="subtitle">Get exactly 1 litre using a 7L and 9L bucket — solved by recursion!</p>
+
+  <div class="rules">
+    <span>Rule 1:</span> If the 7L bucket is empty → fill it from the tap<br>
+    <span>Rule 2:</span> Pour from the 7L into the 9L<br>
+    <span>Rule 3:</span> If the 9L bucket is full → empty it
+  </div>
+
+  <div class="buckets">
+    <div class="bucket-wrap">
+      <div class="bucket-outer" id="b7outer" style="height:140px">
+        <div class="bucket-water" id="b7water" style="height:0%"></div>
+      </div>
+      <div class="bucket-label">7-litre</div>
+      <div class="bucket-amount" id="b7label">0 / 7 L</div>
+    </div>
+    <div class="bucket-wrap">
+      <div class="bucket-outer" id="b9outer" style="height:180px">
+        <div class="bucket-water" id="b9water" style="height:0%"></div>
+      </div>
+      <div class="bucket-label">9-litre</div>
+      <div class="bucket-amount" id="b9label">0 / 9 L</div>
+    </div>
+  </div>
+
+  <div class="step-num" id="stepNum">Step 0</div>
+  <div class="step-box" id="stepBox">Press "Auto Solve" to watch the recursion work!</div>
+
+  <div class="controls" style="margin-top:16px">
+    <button class="btn-go" id="autoBtn" onclick="autoSolve()">▶ Auto Solve</button>
+    <button class="btn-step" id="stepBtn" onclick="nextStep()">Step →</button>
+    <button class="btn-reset" onclick="resetPuzzle()">↺ Reset</button>
+  </div>
+</div>
+
+<script>
+// Pre-compute all steps using the recursive strategy
+function computeSteps() {
+  const steps = [];
+  const visited = new Set();
+  function solve(b7, b9) {
+    const key = `${b7},${b9}`;
+    if (visited.has(key)) return;
+    visited.add(key);
+    let msg = '';
+    if (b7 === 0) msg = 'Rule 1: Fill the 7-litre bucket from the tap';
+    else if (b9 === 9) msg = 'Rule 3: Empty the 9-litre bucket';
+    else { const p = Math.min(b7, 9 - b9); msg = `Rule 2: Pour ${p}L from 7L into 9L`; }
+    steps.push({ b7, b9, msg });
+    if (b7 === 1) { steps.push({ b7: 1, b9, msg: '🎉 Got exactly 1 litre! Puzzle solved!' }); return; }
+    if (b7 === 0) solve(7, b9);
+    else if (b9 === 9) solve(b7, 0);
+    else { const p = Math.min(b7, 9 - b9); solve(b7 - p, b9 + p); }
+  }
+  solve(0, 0);
+  return steps;
+}
+
+const steps = computeSteps();
+let current = 0;
+let autoTimer = null;
+
+function showStep(i) {
+  const s = steps[i];
+  document.getElementById('b7water').style.height = (s.b7 / 7 * 100) + '%';
+  document.getElementById('b9water').style.height = (s.b9 / 9 * 100) + '%';
+  document.getElementById('b7label').textContent = `${s.b7} / 7 L`;
+  document.getElementById('b9label').textContent = `${s.b9} / 9 L`;
+  document.getElementById('stepNum').textContent = `Step ${i}`;
+  const box = document.getElementById('stepBox');
+  box.innerHTML = i === steps.length - 1
+    ? `<span class="win-msg">${s.msg}</span>`
+    : s.msg;
+}
+
+function nextStep() {
+  if (current < steps.length - 1) {
+    current++;
+    showStep(current);
+  }
+  if (current >= steps.length - 1) {
+    document.getElementById('stepBtn').disabled = true;
+    document.getElementById('autoBtn').disabled = true;
+  }
+}
+
+function autoSolve() {
+  clearInterval(autoTimer);
+  document.getElementById('autoBtn').disabled = true;
+  document.getElementById('stepBtn').disabled = true;
+  autoTimer = setInterval(() => {
+    if (current < steps.length - 1) {
+      current++;
+      showStep(current);
+    } else {
+      clearInterval(autoTimer);
+    }
+  }, 700);
+}
+
+function resetPuzzle() {
+  clearInterval(autoTimer);
+  current = 0;
+  showStep(0);
+  document.getElementById('stepBtn').disabled = false;
+  document.getElementById('autoBtn').disabled = false;
+  document.getElementById('stepNum').textContent = 'Step 0';
+  document.getElementById('stepBox').textContent = 'Press "Auto Solve" to watch the recursion work!';
+  document.getElementById('b7water').style.height = '0%';
+  document.getElementById('b9water').style.height = '0%';
+  document.getElementById('b7label').textContent = '0 / 7 L';
+  document.getElementById('b9label').textContent = '0 / 9 L';
+}
+</script>
+</body>
+</html>

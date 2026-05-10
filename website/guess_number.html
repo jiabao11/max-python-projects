@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guess the Number – Max's Projects</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0d0d1a; color: #e8e8f0; font-family: 'Segoe UI', sans-serif;
+         min-height: 100vh; display: flex; flex-direction: column; align-items: center; }
+  .back { align-self: flex-start; margin: 20px; text-decoration: none;
+          color: #8888aa; font-size: 0.9rem; }
+  .back:hover { color: #ff6b6b; }
+  .card { background: #1a1a3e; border: 1px solid #ff6b6b55; border-radius: 20px;
+          padding: 40px; max-width: 460px; width: 90%; margin: 20px; text-align: center; }
+  h1 { font-size: 1.8rem; margin-bottom: 8px; }
+  .subtitle { color: #8888aa; margin-bottom: 30px; }
+  .tries-row { display: flex; justify-content: center; gap: 10px; margin-bottom: 24px; }
+  .dot { width: 14px; height: 14px; border-radius: 50%; background: #ff6b6b; transition: background 0.3s; }
+  .dot.used { background: #2a2a5e; }
+  input {
+    width: 100%; padding: 14px 18px; border-radius: 12px;
+    border: 2px solid #2a2a5e; background: #0d0d1a; color: #e8e8f0;
+    font-size: 1.2rem; text-align: center; margin-bottom: 14px;
+    transition: border-color 0.2s; outline: none;
+  }
+  input:focus { border-color: #ff6b6b; }
+  button {
+    width: 100%; padding: 14px; border-radius: 12px; border: none;
+    background: #ff6b6b; color: #0d0d1a; font-size: 1.1rem;
+    font-weight: 700; cursor: pointer; transition: opacity 0.2s;
+  }
+  button:hover { opacity: 0.85; }
+  button:disabled { opacity: 0.4; cursor: not-allowed; }
+  .feedback {
+    margin-top: 20px; padding: 16px; border-radius: 12px;
+    font-size: 1.1rem; font-weight: 600; min-height: 56px;
+    display: flex; align-items: center; justify-content: center;
+    background: #0d0d1a;
+  }
+  .high { color: #fd79a8; }
+  .low  { color: #74b9ff; }
+  .win  { color: #55efc4; }
+  .lose { color: #ff6b6b; }
+  .history { margin-top: 18px; text-align: left; }
+  .history p { font-size: 0.85rem; color: #8888aa; padding: 4px 0;
+               border-bottom: 1px solid #1a1a3e; }
+  .play-again {
+    margin-top: 16px; background: #2a2a5e; color: #e8e8f0;
+    width: 100%; padding: 12px; border-radius: 12px; border: none;
+    font-size: 1rem; font-weight: 600; cursor: pointer;
+  }
+  .play-again:hover { background: #3a3a7e; }
+  .range-hint { color: #8888aa; font-size: 0.85rem; margin-bottom: 16px; }
+</style>
+</head>
+<body>
+<a class="back" href="index.html">← Back to all projects</a>
+<div class="card">
+  <h1>🎯 Guess the Number</h1>
+  <p class="subtitle">I'm thinking of a number between 1 and 20</p>
+  <div class="tries-row" id="dots"></div>
+  <p class="range-hint" id="rangeHint">You have 4 tries. Good luck!</p>
+  <input type="number" id="guessInput" placeholder="Your guess..." min="1" max="20">
+  <button id="submitBtn" onclick="makeGuess()">Submit Guess</button>
+  <div class="feedback" id="feedback">Type a number and press Submit!</div>
+  <div class="history" id="history"></div>
+  <button class="play-again" id="againBtn" onclick="newGame()" style="display:none">🔄 Play Again</button>
+</div>
+
+<script>
+let secret, tries, maxTries = 4, gameOver = false;
+
+function newGame() {
+  secret = Math.floor(Math.random() * 20) + 1;
+  tries = 0;
+  gameOver = false;
+  document.getElementById('guessInput').value = '';
+  document.getElementById('feedback').textContent = 'Type a number and press Submit!';
+  document.getElementById('feedback').className = 'feedback';
+  document.getElementById('history').innerHTML = '';
+  document.getElementById('submitBtn').disabled = false;
+  document.getElementById('againBtn').style.display = 'none';
+  document.getElementById('rangeHint').textContent = 'You have 4 tries. Good luck!';
+  renderDots();
+  document.getElementById('guessInput').focus();
+}
+
+function renderDots() {
+  const d = document.getElementById('dots');
+  d.innerHTML = '';
+  for (let i = 0; i < maxTries; i++) {
+    const dot = document.createElement('div');
+    dot.className = 'dot' + (i < tries ? ' used' : '');
+    d.appendChild(dot);
+  }
+}
+
+function makeGuess() {
+  if (gameOver) return;
+  const input = document.getElementById('guessInput');
+  const g = parseInt(input.value);
+  if (isNaN(g) || g < 1 || g > 20) {
+    document.getElementById('feedback').textContent = '⚠️ Please enter a number between 1 and 20!';
+    return;
+  }
+  tries++;
+  renderDots();
+  const fb = document.getElementById('feedback');
+  const hist = document.getElementById('history');
+  const row = document.createElement('p');
+
+  if (g === secret) {
+    fb.textContent = `🎉 Yes! The number was ${secret}! You got it in ${tries} ${tries===1?'try':'tries'}!`;
+    fb.className = 'feedback win';
+    row.textContent = `Try ${tries}: ${g} ✅`;
+    endGame();
+  } else if (tries >= maxTries) {
+    fb.textContent = `😔 Out of tries! The number was ${secret}.`;
+    fb.className = 'feedback lose';
+    row.textContent = `Try ${tries}: ${g} ❌`;
+    endGame();
+  } else if (g > secret) {
+    fb.textContent = `📉 Too high! Try lower.`;
+    fb.className = 'feedback high';
+    row.textContent = `Try ${tries}: ${g} — too high`;
+    document.getElementById('rangeHint').textContent = `${maxTries - tries} ${maxTries-tries===1?'try':'tries'} left`;
+  } else {
+    fb.textContent = `📈 Too low! Try higher.`;
+    fb.className = 'feedback low';
+    row.textContent = `Try ${tries}: ${g} — too low`;
+    document.getElementById('rangeHint').textContent = `${maxTries - tries} ${maxTries-tries===1?'try':'tries'} left`;
+  }
+  hist.prepend(row);
+  input.value = '';
+  input.focus();
+}
+
+function endGame() {
+  gameOver = true;
+  document.getElementById('submitBtn').disabled = true;
+  document.getElementById('againBtn').style.display = 'block';
+}
+
+document.getElementById('guessInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') makeGuess();
+});
+
+newGame();
+</script>
+</body>
+</html>

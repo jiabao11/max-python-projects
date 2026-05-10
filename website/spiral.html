@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rainbow Spiral – Max's Projects</title>
+<script src="https://skulpt.org/js/skulpt.min.js"></script>
+<script src="https://skulpt.org/js/skulpt-stdlib.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0d0d1a; color: #e8e8f0; font-family: 'Segoe UI', sans-serif;
+         min-height: 100vh; display: flex; flex-direction: column; align-items: center; }
+  .back { align-self: flex-start; margin: 20px; text-decoration: none; color: #8888aa; font-size: 0.9rem; }
+  .back:hover { color: #a29bfe; }
+  .card { background: #1a1a3e; border: 1px solid #a29bfe55; border-radius: 20px;
+          padding: 28px; max-width: 560px; width: 92%; margin: 10px; text-align: center; }
+  h1 { font-size: 1.8rem; margin-bottom: 8px; }
+  .subtitle { color: #8888aa; margin-bottom: 20px; }
+  #mycanvas { border-radius: 12px; overflow: hidden; margin: 0 auto 20px; display: block; }
+  #mycanvas canvas { border-radius: 12px; }
+  .controls { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  button {
+    padding: 11px 28px; border-radius: 10px; border: none;
+    font-size: 0.95rem; font-weight: 700; cursor: pointer; transition: opacity 0.2s;
+  }
+  .btn-run   { background: #a29bfe; color: #0d0d1a; }
+  .btn-reset { background: #2a2a5e; color: #e8e8f0; }
+  button:hover { opacity: 0.85; }
+  button:disabled { opacity: 0.4; cursor: not-allowed; }
+  .status { color: #8888aa; font-size: 0.85rem; margin-top: 12px; min-height: 20px; }
+</style>
+</head>
+<body>
+<a class="back" href="index.html">← Back to all projects</a>
+<div class="card">
+  <h1>🌀 Rainbow Spiral</h1>
+  <p class="subtitle">Max's Python turtle code running live in your browser!</p>
+  <div id="mycanvas"></div>
+  <div class="controls">
+    <button class="btn-run" id="runBtn" onclick="runSpiral()">▶ Draw Spiral</button>
+    <button class="btn-reset" onclick="resetSpiral()">↺ Clear</button>
+  </div>
+  <div class="status" id="status">Press "Draw Spiral" to run Max's code!</div>
+</div>
+
+<script>
+const code = `
+import turtle
+from itertools import cycle
+
+colors = cycle(['red','orange','yellow','green','blue','purple'])
+
+t = turtle.Turtle()
+t.speed(0)
+screen = turtle.Screen()
+screen.bgcolor('black')
+
+def square(size):
+    for i in range(4):
+        t.color(next(colors))
+        t.right(90)
+        t.forward(size)
+
+def draw(size, angle, shift):
+    if size > 120:
+        return
+    t.color(next(colors))
+    t.circle(size / 2)
+    t.right(angle)
+    t.penup()
+    t.forward(shift)
+    t.pendown()
+    square(size)
+    t.right(angle)
+    t.penup()
+    t.forward(shift)
+    t.pendown()
+    draw(size + 5, angle, shift + 1)
+
+draw(5, 10, 5)
+`;
+
+function builtinRead(x) {
+  if (Sk.builtinFiles === undefined || Sk.builtinFiles.files[x] === undefined)
+    throw "File not found: '" + x + "'";
+  return Sk.builtinFiles.files[x];
+}
+
+function runSpiral() {
+  document.getElementById('runBtn').disabled = true;
+  document.getElementById('status').textContent = 'Drawing... (this may take a moment)';
+  Sk.configure({ output: () => {}, read: builtinRead, __future__: Sk.python3 });
+  (Sk.TurtleGraphics || (Sk.TurtleGraphics = {})).target = 'mycanvas';
+  Sk.TurtleGraphics.width  = 480;
+  Sk.TurtleGraphics.height = 380;
+  Sk.misceval.asyncToPromise(() =>
+    Sk.importMainWithBody('<stdin>', false, code, true)
+  ).then(() => {
+    document.getElementById('status').textContent = '✅ Done! Max wrote this in Python 🐍';
+    document.getElementById('runBtn').disabled = false;
+  }).catch(e => {
+    document.getElementById('status').textContent = 'Error: ' + e.toString();
+    document.getElementById('runBtn').disabled = false;
+  });
+}
+
+function resetSpiral() {
+  const wrap = document.getElementById('mycanvas');
+  wrap.innerHTML = '';
+  document.getElementById('status').textContent = 'Press "Draw Spiral" to run Max\'s code!';
+  document.getElementById('runBtn').disabled = false;
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shape Drawer – Max's Projects</title>
+<script src="https://skulpt.org/js/skulpt.min.js"></script>
+<script src="https://skulpt.org/js/skulpt-stdlib.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0d0d1a; color: #e8e8f0; font-family: 'Segoe UI', sans-serif;
+         min-height: 100vh; display: flex; flex-direction: column; align-items: center; }
+  .back { align-self: flex-start; margin: 20px; text-decoration: none; color: #8888aa; font-size: 0.9rem; }
+  .back:hover { color: #55efc4; }
+  .card { background: #1a1a3e; border: 1px solid #55efc455; border-radius: 20px;
+          padding: 28px; max-width: 560px; width: 92%; margin: 10px; text-align: center; }
+  h1 { font-size: 1.8rem; margin-bottom: 8px; }
+  .subtitle { color: #8888aa; margin-bottom: 20px; }
+  #mycanvas { margin: 0 auto 20px; display: block; }
+  .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+  label { text-align: left; font-size: 0.85rem; color: #8888aa; }
+  input[type=range] { width: 100%; accent-color: #55efc4; }
+  .val { color: #55efc4; font-weight: 700; }
+  .btn-row { display: flex; gap: 12px; justify-content: center; }
+  button {
+    padding: 11px 28px; border-radius: 10px; border: none;
+    font-size: 0.95rem; font-weight: 700; cursor: pointer; transition: opacity 0.2s;
+  }
+  .btn-draw  { background: #55efc4; color: #0d0d1a; }
+  .btn-clear { background: #2a2a5e; color: #e8e8f0; }
+  button:hover { opacity: 0.85; }
+  button:disabled { opacity: 0.4; cursor: not-allowed; }
+  .status { color: #8888aa; font-size: 0.85rem; margin-top: 12px; min-height: 20px; }
+</style>
+</head>
+<body>
+<a class="back" href="index.html">← Back to all projects</a>
+<div class="card">
+  <h1>🔷 Shape Drawer</h1>
+  <p class="subtitle">Choose your settings and watch Python turtle draw!</p>
+
+  <div id="mycanvas"></div>
+
+  <div class="controls">
+    <div>
+      <label>Sides: <span class="val" id="sidesVal">6</span></label><br>
+      <input type="range" id="sides" min="3" max="12" value="6" oninput="document.getElementById('sidesVal').textContent=this.value">
+    </div>
+    <div>
+      <label>Size: <span class="val" id="sizeVal">80</span>px</label><br>
+      <input type="range" id="size" min="20" max="150" value="80" oninput="document.getElementById('sizeVal').textContent=this.value">
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn-draw" id="drawBtn" onclick="drawShape()">▶ Draw!</button>
+    <button class="btn-clear" onclick="clearCanvas()">↺ Clear</button>
+  </div>
+  <div class="status" id="status">Pick your settings and press Draw!</div>
+</div>
+
+<script>
+function builtinRead(x) {
+  if (Sk.builtinFiles === undefined || Sk.builtinFiles.files[x] === undefined)
+    throw "File not found: '" + x + "'";
+  return Sk.builtinFiles.files[x];
+}
+
+function makeCode(sides, size) {
+  return `
+import turtle
+import random
+
+t = turtle.Turtle()
+t.speed(6)
+screen = turtle.Screen()
+screen.bgcolor('#0d0d1a')
+
+colors = ['red','orange','yellow','green','cyan','blue','violet','magenta','white']
+sides = ${sides}
+size = ${size}
+angle = 360 / sides
+
+t.pensize(3)
+for i in range(sides):
+    t.color(colors[i % len(colors)])
+    t.forward(size)
+    t.left(angle)
+t.hideturtle()
+`;
+}
+
+function drawShape() {
+  clearCanvas();
+  const sides = document.getElementById('sides').value;
+  const size  = document.getElementById('size').value;
+  document.getElementById('drawBtn').disabled = true;
+  document.getElementById('status').textContent = 'Drawing...';
+  Sk.configure({ output: () => {}, read: builtinRead, __future__: Sk.python3 });
+  (Sk.TurtleGraphics || (Sk.TurtleGraphics = {})).target = 'mycanvas';
+  Sk.TurtleGraphics.width  = 480;
+  Sk.TurtleGraphics.height = 340;
+  Sk.misceval.asyncToPromise(() =>
+    Sk.importMainWithBody('<stdin>', false, makeCode(sides, size), true)
+  ).then(() => {
+    document.getElementById('status').textContent = `✅ Drew a ${sides}-sided shape with size ${size}!`;
+    document.getElementById('drawBtn').disabled = false;
+  }).catch(e => {
+    document.getElementById('status').textContent = 'Error: ' + e;
+    document.getElementById('drawBtn').disabled = false;
+  });
+}
+
+function clearCanvas() {
+  document.getElementById('mycanvas').innerHTML = '';
+  document.getElementById('status').textContent = 'Pick your settings and press Draw!';
+  document.getElementById('drawBtn').disabled = false;
+}
+</script>
+</body>
+</html>

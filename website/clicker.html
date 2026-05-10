@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Speed Clicker – Max's Projects</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0d0d1a; color: #e8e8f0; font-family: 'Segoe UI', sans-serif;
+         min-height: 100vh; display: flex; flex-direction: column; align-items: center; }
+  .back { align-self: flex-start; margin: 20px; text-decoration: none; color: #8888aa; font-size: 0.9rem; }
+  .back:hover { color: #e17057; }
+  .card { background: #1a1a3e; border: 1px solid #e1705755; border-radius: 20px;
+          padding: 40px; max-width: 440px; width: 92%; margin: 10px; text-align: center; }
+  h1 { font-size: 1.8rem; margin-bottom: 8px; }
+  .subtitle { color: #8888aa; margin-bottom: 28px; }
+  .stats { display: flex; justify-content: space-around; margin-bottom: 28px; }
+  .stat-box { background: #0d0d1a; border-radius: 12px; padding: 14px 20px; min-width: 100px; }
+  .stat-val { font-size: 2.2rem; font-weight: 800; color: #e17057; }
+  .stat-lbl { font-size: 0.8rem; color: #8888aa; margin-top: 2px; }
+  .timer-val { color: #fdcb6e !important; }
+  .timer-bar-wrap { background: #0d0d1a; border-radius: 10px; height: 10px; margin-bottom: 28px; overflow: hidden; }
+  .timer-bar { height: 100%; background: linear-gradient(90deg, #e17057, #fdcb6e);
+               width: 100%; transition: width 1s linear; border-radius: 10px; }
+  .click-btn {
+    width: 180px; height: 180px; border-radius: 50%; border: none;
+    background: radial-gradient(circle at 35% 35%, #ff8c6b, #e17057);
+    color: #0d0d1a; font-size: 1.2rem; font-weight: 800; cursor: pointer;
+    box-shadow: 0 8px 30px #e1705766;
+    transition: transform 0.08s, box-shadow 0.08s;
+    margin-bottom: 24px;
+  }
+  .click-btn:hover { box-shadow: 0 12px 40px #e1705799; }
+  .click-btn:active { transform: scale(0.93); box-shadow: 0 4px 16px #e1705766; }
+  .click-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+  .start-btn {
+    padding: 14px 36px; border-radius: 12px; border: none;
+    background: #e17057; color: #0d0d1a; font-size: 1.1rem;
+    font-weight: 700; cursor: pointer; transition: opacity 0.2s;
+    margin-bottom: 16px;
+  }
+  .start-btn:hover { opacity: 0.85; }
+  .result { font-size: 1.1rem; color: #55efc4; font-weight: 700;
+            min-height: 32px; margin-top: 4px; }
+  .highscore { color: #8888aa; font-size: 0.9rem; margin-top: 8px; }
+  .highscore span { color: #fdcb6e; font-weight: 700; }
+</style>
+</head>
+<body>
+<a class="back" href="index.html">← Back to all projects</a>
+<div class="card">
+  <h1>⚡ Speed Clicker</h1>
+  <p class="subtitle">Click as fast as you can in 30 seconds!</p>
+
+  <div class="stats">
+    <div class="stat-box">
+      <div class="stat-val" id="scoreVal">0</div>
+      <div class="stat-lbl">CLICKS</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-val timer-val" id="timerVal">30</div>
+      <div class="stat-lbl">SECONDS</div>
+    </div>
+  </div>
+
+  <div class="timer-bar-wrap">
+    <div class="timer-bar" id="timerBar"></div>
+  </div>
+
+  <button class="click-btn" id="clickBtn" onclick="doClick()" disabled>CLICK!</button>
+  <button class="start-btn" id="startBtn" onclick="startGame()">▶ Start!</button>
+  <div class="result" id="result"></div>
+  <div class="highscore">Best: <span id="highscore">0</span> clicks</div>
+</div>
+
+<script>
+let score = 0, timeLeft = 30, timer = null, running = false, best = 0;
+
+function startGame() {
+  score = 0; timeLeft = 30; running = true;
+  document.getElementById('scoreVal').textContent = '0';
+  document.getElementById('timerVal').textContent = '30';
+  document.getElementById('timerBar').style.width = '100%';
+  document.getElementById('result').textContent = '';
+  document.getElementById('clickBtn').disabled = false;
+  document.getElementById('startBtn').disabled = true;
+  document.getElementById('clickBtn').focus();
+  clearInterval(timer);
+  timer = setInterval(() => {
+    timeLeft--;
+    document.getElementById('timerVal').textContent = timeLeft;
+    document.getElementById('timerBar').style.width = (timeLeft / 30 * 100) + '%';
+    if (timeLeft <= 0) endGame();
+  }, 1000);
+}
+
+function doClick() {
+  if (!running) return;
+  score++;
+  document.getElementById('scoreVal').textContent = score;
+  // tiny pop animation
+  const btn = document.getElementById('clickBtn');
+  btn.style.transform = 'scale(0.94)';
+  setTimeout(() => btn.style.transform = '', 80);
+}
+
+function endGame() {
+  clearInterval(timer);
+  running = false;
+  document.getElementById('clickBtn').disabled = true;
+  document.getElementById('startBtn').disabled = false;
+  if (score > best) {
+    best = score;
+    document.getElementById('highscore').textContent = best;
+    document.getElementById('result').textContent = `🏆 New best: ${score} clicks!`;
+  } else {
+    document.getElementById('result').textContent = `You clicked ${score} times! Can you beat ${best}?`;
+  }
+}
+
+document.addEventListener('keydown', e => {
+  if (e.code === 'Space' && running) { e.preventDefault(); doClick(); }
+});
+</script>
+</body>
+</html>

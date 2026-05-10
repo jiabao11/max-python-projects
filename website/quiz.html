@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Maths Quiz – Max's Projects</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0d0d1a; color: #e8e8f0; font-family: 'Segoe UI', sans-serif;
+         min-height: 100vh; display: flex; flex-direction: column; align-items: center; }
+  .back { align-self: flex-start; margin: 20px; text-decoration: none; color: #8888aa; font-size: 0.9rem; }
+  .back:hover { color: #fdcb6e; }
+  .card { background: #1a1a3e; border: 1px solid #fdcb6e55; border-radius: 20px;
+          padding: 36px; max-width: 480px; width: 92%; margin: 10px; text-align: center; }
+  h1 { font-size: 1.8rem; margin-bottom: 8px; }
+  .subtitle { color: #8888aa; margin-bottom: 24px; }
+  .hud { display: flex; justify-content: space-between; margin-bottom: 20px; }
+  .hud-box { background: #0d0d1a; border-radius: 10px; padding: 10px 18px; }
+  .hud-val { font-size: 1.5rem; font-weight: 800; color: #fdcb6e; }
+  .hud-lbl { font-size: 0.75rem; color: #8888aa; }
+  .lives-row { display: flex; gap: 6px; justify-content: center; margin-bottom: 20px; }
+  .heart { font-size: 1.5rem; transition: opacity 0.3s; }
+  .heart.lost { opacity: 0.15; }
+  .progress-wrap { background: #0d0d1a; border-radius: 8px; height: 8px; margin-bottom: 24px; overflow: hidden; }
+  .progress-bar { height: 100%; background: linear-gradient(90deg, #fdcb6e, #e17057);
+                  width: 0%; border-radius: 8px; transition: width 0.4s; }
+  .question-box { background: #0d0d1a; border-radius: 14px; padding: 24px;
+                  font-size: 2rem; font-weight: 800; margin-bottom: 20px;
+                  color: #fdcb6e; letter-spacing: 2px; min-height: 80px;
+                  display: flex; align-items: center; justify-content: center; }
+  input {
+    width: 100%; padding: 14px; border-radius: 12px; border: 2px solid #2a2a5e;
+    background: #0d0d1a; color: #e8e8f0; font-size: 1.3rem; text-align: center;
+    margin-bottom: 14px; outline: none; transition: border-color 0.2s;
+  }
+  input:focus { border-color: #fdcb6e; }
+  button {
+    width: 100%; padding: 14px; border-radius: 12px; border: none;
+    background: #fdcb6e; color: #0d0d1a; font-size: 1.1rem;
+    font-weight: 700; cursor: pointer; transition: opacity 0.2s;
+  }
+  button:hover { opacity: 0.85; }
+  button:disabled { opacity: 0.4; cursor: not-allowed; }
+  .feedback { margin-top: 16px; font-size: 1rem; font-weight: 600;
+              min-height: 28px; color: #8888aa; }
+  .correct { color: #55efc4; }
+  .wrong   { color: #ff6b6b; }
+  .end-screen { display: none; }
+  .end-score { font-size: 3rem; font-weight: 800; color: #fdcb6e; margin: 16px 0; }
+  .end-msg { color: #8888aa; margin-bottom: 20px; }
+  .play-again { background: #2a2a5e; color: #e8e8f0; margin-top: 8px; }
+</style>
+</head>
+<body>
+<a class="back" href="index.html">← Back to all projects</a>
+<div class="card">
+  <h1>🧮 Maths Quiz</h1>
+  <p class="subtitle">20 questions · 3 lives · Beat your score!</p>
+
+  <div id="gameScreen">
+    <div class="hud">
+      <div class="hud-box"><div class="hud-val" id="qNum">1</div><div class="hud-lbl">QUESTION</div></div>
+      <div class="hud-box"><div class="hud-val" id="scoreVal">0</div><div class="hud-lbl">SCORE</div></div>
+    </div>
+    <div class="lives-row" id="hearts"></div>
+    <div class="progress-wrap"><div class="progress-bar" id="progress"></div></div>
+    <div class="question-box" id="questionBox">Loading...</div>
+    <input type="number" id="answerInput" placeholder="Your answer...">
+    <button id="submitBtn" onclick="submitAnswer()">Submit</button>
+    <div class="feedback" id="feedback"></div>
+  </div>
+
+  <div class="end-screen" id="endScreen">
+    <div style="font-size:3rem">🎉</div>
+    <div class="end-score" id="endScore"></div>
+    <div class="end-msg" id="endMsg"></div>
+    <button onclick="newGame()">▶ Play Again</button>
+  </div>
+</div>
+
+<script>
+const TOTAL = 20, MAX_LIVES = 3;
+let score, lives, qNum, answer, gameOver;
+
+function newGame() {
+  score = 0; lives = MAX_LIVES; qNum = 0; gameOver = false;
+  document.getElementById('endScreen').style.display = 'none';
+  document.getElementById('gameScreen').style.display = 'block';
+  document.getElementById('submitBtn').disabled = false;
+  renderHearts(); nextQuestion();
+}
+
+function renderHearts() {
+  const h = document.getElementById('hearts');
+  h.innerHTML = '';
+  for (let i = 0; i < MAX_LIVES; i++) {
+    const s = document.createElement('span');
+    s.className = 'heart' + (i >= lives ? ' lost' : '');
+    s.textContent = '❤️';
+    h.appendChild(s);
+  }
+}
+
+function nextQuestion() {
+  qNum++;
+  document.getElementById('qNum').textContent = qNum;
+  document.getElementById('progress').style.width = ((qNum-1) / TOTAL * 100) + '%';
+  document.getElementById('feedback').textContent = '';
+  document.getElementById('answerInput').value = '';
+  const n1 = Math.floor(Math.random() * 12) + 1;
+  const n2 = Math.floor(Math.random() * 12) + 1;
+  const op = ['+', '-', '×'][Math.floor(Math.random() * 3)];
+  if (op === '+') answer = n1 + n2;
+  else if (op === '-') { answer = Math.abs(n1 - n2); document.getElementById('questionBox').textContent = `${Math.max(n1,n2)} − ${Math.min(n1,n2)} = ?`; document.getElementById('answerInput').focus(); return; }
+  else answer = n1 * n2;
+  document.getElementById('questionBox').textContent = `${n1} ${op} ${n2} = ?`;
+  document.getElementById('answerInput').focus();
+}
+
+function submitAnswer() {
+  const val = parseInt(document.getElementById('answerInput').value);
+  const fb = document.getElementById('feedback');
+  if (isNaN(val)) { fb.textContent = '⚠️ Please enter a number!'; fb.className = 'feedback'; return; }
+  if (val === answer) {
+    score++;
+    document.getElementById('scoreVal').textContent = score;
+    fb.textContent = `✅ Correct!`;
+    fb.className = 'feedback correct';
+  } else {
+    lives--;
+    renderHearts();
+    fb.textContent = `❌ Wrong! The answer was ${answer}`;
+    fb.className = 'feedback wrong';
+  }
+  if (lives <= 0) { endGame(false); return; }
+  if (qNum >= TOTAL) { endGame(true); return; }
+  setTimeout(nextQuestion, 900);
+}
+
+function endGame(won) {
+  document.getElementById('gameScreen').style.display = 'none';
+  document.getElementById('endScreen').style.display = 'block';
+  document.getElementById('endScore').textContent = `${score} / ${TOTAL}`;
+  document.getElementById('endMsg').textContent = won
+    ? `🏆 You won with ${lives} ${lives===1?'life':'lives'} remaining!`
+    : `Game over! You scored ${score} out of ${TOTAL}.`;
+}
+
+document.getElementById('answerInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') submitAnswer();
+});
+
+newGame();
+</script>
+</body>
+</html>
